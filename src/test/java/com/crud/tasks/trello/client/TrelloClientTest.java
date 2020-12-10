@@ -33,7 +33,7 @@ public class TrelloClientTest {
     private TrelloConfig trelloConfig;
 
     @Test
-    public void shouldFetchTrelloBoards() {
+    public void shouldFetchTrelloBoards() throws URISyntaxException {
         // Given
         when(trelloConfig.getTrelloApiEndpoint()).thenReturn("http://test.com");
         when(trelloConfig.getTrelloAppKey()).thenReturn("test");
