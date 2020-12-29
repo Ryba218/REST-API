@@ -4,6 +4,7 @@ import com.crud.tasks.domain.CreatedTrelloCardDto;
 import com.crud.tasks.domain.TrelloBoardDto;
 import com.crud.tasks.domain.TrelloCardDto;
 import com.crud.tasks.trello.config.TrelloConfig;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,12 +35,19 @@ public class TrelloClientTest {
     @Mock
     private TrelloConfig trelloConfig;
 
-    @Test
-    public void shouldFetchTrelloBoards() throws URISyntaxException {
-        // Given
+    @Before
+    public void init() {
         when(trelloConfig.getTrelloApiEndpoint()).thenReturn("http://test.com");
         when(trelloConfig.getTrelloAppKey()).thenReturn("test");
         when(trelloConfig.getTrelloAppToken()).thenReturn("test");
+        when(trelloConfig.getTrelloUsername()).thenReturn("maciejwiejacki");
+
+    }
+
+    @Test
+    public void shouldFetchTrelloBoards() throws URISyntaxException {
+        // Given
+
 
         TrelloBoardDto[] trelloBoards = new TrelloBoardDto[1];
         trelloBoards[0] = new TrelloBoardDto("test_id","test_board", new ArrayList<>());
@@ -82,7 +92,7 @@ public class TrelloClientTest {
 
         //Then
         assertEquals("1",newCard.getId() );
-        assertEquals("Task task", newCard.getName());
+        assertEquals("Test task", newCard.getName());
         assertEquals("http://test.com", newCard.getShortUrl());
 
     }
@@ -90,12 +100,9 @@ public class TrelloClientTest {
     @Test
     public void shouldReturnEmptyList() throws URISyntaxException {
         //Given
-        URI uri = new URI("http://test.com/members/usersname/boards?key=test&token=test&fields=name,id&lists=all");
-
-        when(restTemplate.getForObject(uri, TrelloBoardDto[].class)).thenReturn(null);
+        when(restTemplate.getForObject(any(),eq(TrelloBoardDto[].class))).thenReturn(null);
 
         //When
-
         List<TrelloBoardDto> emptyList = trelloClient.getTrelloBoards();
         List<TrelloBoardDto> emptyList2 = new ArrayList<>();
 
