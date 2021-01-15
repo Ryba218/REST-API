@@ -15,5 +15,6 @@ public class StaticWebPageController {
         model.put("one", 1);
         model.put("two", 2);
         return "index";
+
     }
 }
