@@ -3,6 +3,8 @@ package com.crud.tasks.service;
 
 import com.crud.tasks.config.AdminConfig;
 import com.crud.tasks.config.CompanyConfig;
+import com.crud.tasks.domain.Task;
+import com.crud.tasks.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import org.thymeleaf.context.Context;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MailCreatorService {
@@ -20,6 +23,9 @@ public class MailCreatorService {
 
     @Autowired
     private CompanyConfig companyConfig;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     @Qualifier("templateEngine")
@@ -46,4 +52,34 @@ public class MailCreatorService {
 
         return templateEngine.process("mail/created-trello-card-mail", context);
     }
+
+    public String buildDailyScheduleEmail(String message) {
+
+        List<String> capability = new ArrayList<>();
+        capability.add("You can manage your tasks");
+        capability.add("Provides connection with Trello Account");
+        capability.add("Application allows sending tasks to Trello");
+
+        List<Task> tasksList = taskRepository.findAll();
+
+        List<String> tasks = taskRepository.findAll().stream()
+                .map(task -> task.getId() + ". " + task.getTitle())
+                .collect(Collectors.toList());
+
+        String ending = (taskRepository.count() != 1) ? "s" : "";
+
+        Context context = new Context();
+        context.setVariable("tasks_url", "http://localhost:8080/v1/tasks");
+        context.setVariable("button", "Visit website");
+        context.setVariable("show_button", true);
+        context.setVariable("admin_config", adminConfig);
+        context.setVariable("number_of_tasks", "You have " + taskRepository.count() + " task" + ending + "in a database at the moment.");
+        context.setVariable("tasks", tasks);
+        context.setVariable("tasks_list", tasksList);
+        context.setVariable("task_orientation", capability);
+        context.setVariable("is_daily_message", true);
+        return templateEngine.process("mail/daily-number-of-tasks-mail", context);
+    }
+
+
 }
